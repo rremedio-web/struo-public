@@ -1,0 +1,81 @@
+:root {
+	/* Mission Brief tokens — light default */
+	--sae-ground: #f3f4f1;
+	--sae-surface: #ffffff;
+	--sae-ink: #1b2430;
+	--sae-muted: #6b7280;
+	--sae-line: #dde1dc;
+	--sae-accent: #2f4fb8;
+	--sae-accent-ink: #ffffff;
+	--sae-accent-soft: rgba(47, 79, 184, 0.09);
+	--sae-gold: #c98a1b;
+	--sae-good: #15803d;
+	--sae-warn: #b45309;
+	--sae-danger: #b91c1c;
+	/* Legacy aliases remapped onto the light scheme */
+	--sae-navy-900: var(--sae-ground);
+	--sae-surface-nav: var(--sae-ground);
+	--sae-surface-1: var(--sae-surface);
+	--sae-surface-2: var(--sae-surface);
+	--sae-surface-3: var(--sae-surface);
+	--sae-teal-500: var(--sae-accent);
+	--sae-teal-300: var(--sae-accent);
+	--sae-teal-400: var(--sae-accent);
+	--sae-danger-500: var(--sae-danger);
+	--sae-success-500: var(--sae-good);
+	--sae-warning-500: var(--sae-warn);
+	--sae-slate-500: var(--sae-muted);
+	--sae-gray-100: var(--sae-ground);
+	--sae-gray-200: var(--sae-line);
+	--sae-gray-300: var(--sae-muted);
+	--sae-gray-400: var(--sae-muted);
+	--sae-panel: var(--sae-surface);
+	--sae-panel-border: var(--sae-line);
+	--sae-shadow-panel: 0 1px 2px rgba(27, 36, 48, 0.06);
+	--sae-shadow-card: 0 1px 2px rgba(27, 36, 48, 0.05);
+	--sae-highlight-top: none;
+	--sae-radius-lg: 16px;
+	--sae-radius-md: 12px;
+	--sae-radius-sm: 8px;
+}
+
+/* Dark set — scoped to WP's Midnight admin scheme only */
+body.admin-color-midnight {
+	--sae-ground: #12161c;
+	--sae-surface: #1a2029;
+	--sae-ink: #e8ebef;
+	--sae-muted: #8b95a3;
+	--sae-line: #2a3340;
+	--sae-accent: #7d94f0;
+	--sae-accent-ink: #0f1420;
+	--sae-accent-soft: rgba(125, 148, 240, 0.16);
+	--sae-gold: #e0ae4a;
+	--sae-good: #4ade80;
+	--sae-warn: #fbbf24;
+	--sae-danger: #f87171;
+	--sae-shadow-panel: 0 1px 2px rgba(0, 0, 0, 0.4);
+	--sae-shadow-card: 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+body.admin-color-midnight.toplevel_page_struo-console {
+	--sae-brand-primary-rgb: 125, 148, 240;
+	--sae-brand-accent-rgb: 224, 174, 74;
+}
+
+body.toplevel_page_struo-console {
+	/* Re-point legacy brand tint channels at the Mission Brief palette
+	   (body-level specificity beats the injected :root theme inline CSS) */
+	--sae-brand-primary-rgb: 47, 79, 184;
+	--sae-brand-accent-rgb: 201, 138, 27;
+	background: var(--sae-ground);
+}
+
+body.toplevel_page_struo-console.sae-console-mode-simple {
+	--sae-ground: #efece4;
+	--sae-surface: #fbfaf6;
+	--sae-line: #e0dbd0;
+	--sae-accent: #1b2430;
+	--sae-accent-ink: #fbfaf6;
+	--sae-accent-soft: rgba(27, 36, 48, 0.08);
+	--sae-brand-primary-rgb: 27, 36, 48;
+}

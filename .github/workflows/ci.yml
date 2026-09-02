@@ -1,0 +1,226 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ci:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.2', '8.3', '8.4', '8.5']
+
+    steps:
+      # actions/checkout v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # shivammathur/setup-php 2.35.5 (commit object, not a tag SHA)
+      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      # actions/setup-node v4.4.0 — PHP 8.2 owns Node syntax, npm lint, and zip drift.
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        if: matrix.php == '8.2'
+        with:
+          node-version: '20'
+
+      - name: Verify Action pins resolve
+        if: matrix.php == '8.2'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash tests/action-pins.sh --resolve .github/workflows/ci.yml
+
+      - name: Shell syntax
+        if: matrix.php == '8.2'
+        run: |
+          bash -n tests/smoke.sh
+          bash -n tests/rest-probe.sh
+          bash -n tests/action-pins.sh
+          bash -n tests/gitleaks.sh
+          bash -n tests/export-public-cases.sh
+          bash -n bin/build-zip.sh
+          bash -n bin/export-public.sh
+
+      - name: Node syntax
+        if: matrix.php == '8.2'
+        run: |
+          node --check assets/console.js
+          node --check tests/autodetect-cases.mjs
+          node tests/autodetect-cases.mjs
+
+      - name: Work Queue build drift
+        if: matrix.php == '8.2'
+        run: |
+          npm ci
+          npm run build
+          npm run lint
+          npm test
+          git diff --exit-code -- assets/work-queue.js assets/work-queue.asset.php assets/gutenberg-host.js assets/gutenberg-host.asset.php assets/console.js assets/console.css
+
+      - name: Lint every PHP file
+        run: >
+          find . \
+            -path ./.git -prune -o \
+            -path ./vendor -prune -o \
+            -path ./node_modules -prune -o \
+            -path ./dist -prune -o \
+            -type f -name '*.php' -print0 | xargs -0 -n1 php -l
+
+      - name: Static smoke harness
+        run: bash tests/smoke.sh
+
+      - name: Composer install (dev deps)
+        run: composer install --no-interaction --no-progress
+
+      - name: Composer audit
+        run: composer audit --no-interaction
+
+      - name: Gitleaks history scan
+        if: matrix.php == '8.2'
+        run: bash tests/gitleaks.sh --history
+
+      - name: Gitleaks working tree scan
+        if: matrix.php == '8.2'
+        run: bash tests/gitleaks.sh --no-git
+
+      - name: PHPCS extracted modules (blocking)
+        run: >
+          vendor/bin/phpcs --standard=phpcs.xml.dist
+          --runtime-set ignore_warnings_on_exit 1
+
+      # Report-only until further struo.php splits. Do not remove
+      # continue-on-error from this step onto the god class.
+      - name: PHPCS WordPress standard on struo.php (report-only)
+        continue-on-error: true
+        run: >
+          vendor/bin/phpcs --standard=WordPress --extensions=php
+          struo.php
+
+  eval-lite:
+    name: WordPress ${{ matrix.wp }} lite eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - wp: '6.9'
+            config: .wp-env.json
+          - wp: '7.1'
+            config: .wp-env.7.1.json
+    steps:
+      # actions/checkout v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # actions/setup-node v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      - name: Install wp-env
+        run: npm install -g @wordpress/env@10.31.0
+
+      # 10.31.0 has no --config. Passing --config=FILE makes yargs treat it
+      # as the run container name, so every eval job exits immediately.
+      - name: Use WordPress ${{ matrix.wp }} wp-env file
+        if: ${{ matrix.config != '.wp-env.json' }}
+        run: cp -- "${{ matrix.config }}" .wp-env.json
+
+      - name: Start WordPress ${{ matrix.wp }}
+        run: wp-env start
+
+      - name: Run wp-eval-lite.php
+        run: >
+          wp-env run cli wp eval-file
+          wp-content/plugins/struo/tests/wp-eval-lite.php
+          --user=admin
+
+  eval-full:
+    name: WordPress ${{ matrix.wp }} full eval
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - wp: '6.9'
+            config: .wp-env.json
+          - wp: '7.1'
+            config: .wp-env.7.1.json
+    steps:
+      # actions/checkout v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # actions/setup-node v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '20'
+
+      - name: Install wp-env
+        run: npm install -g @wordpress/env@10.31.0
+
+      - name: Use WordPress ${{ matrix.wp }} wp-env file
+        if: ${{ matrix.config != '.wp-env.json' }}
+        run: cp -- "${{ matrix.config }}" .wp-env.json
+
+      - name: Start WordPress ${{ matrix.wp }}
+        run: wp-env start
+
+      - name: Run wp-eval-cases.php
+        run: >
+          wp-env run cli wp eval-file
+          wp-content/plugins/struo/tests/wp-eval-cases.php
+          --user=admin
+
+  package:
+    name: Release zip
+    needs: [ ci, eval-lite, eval-full ]
+    runs-on: ubuntu-latest
+    steps:
+      # actions/checkout v4.2.2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # shivammathur/setup-php 2.35.5
+      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f
+        with:
+          php-version: '8.2'
+          coverage: none
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build release zip
+        run: bash bin/build-zip.sh
+
+      - name: Gitleaks zip artifact
+        run: |
+          unzip -q -d /tmp/struo-zip-scan dist/struo-*.zip
+          bash tests/gitleaks.sh --no-git --source /tmp/struo-zip-scan
+
+      - name: Write and verify SHA-256 checksum
+        run: |
+          cd dist
+          zip="$(ls struo-*.zip)"
+          sha256sum "$zip" | tee "${zip}.sha256"
+          sha256sum -c "${zip}.sha256"
+
+      # actions/upload-artifact v4.6.2
+      - name: Upload release zip artifact
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: struo-release
+          path: |
+            dist/*.zip
+            dist/*.sha256
+          if-no-files-found: error

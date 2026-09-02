@@ -1,0 +1,19 @@
+{
+  "name": "struo",
+  "private": true,
+  "description": "Build Mission Brief Work Queue, Gutenberg host, and console assets.",
+  "scripts": {
+    "build:work-queue": "wp-scripts build",
+    "build:console": "node scripts/build-console.mjs",
+    "build": "wp-scripts build && node scripts/build-console.mjs",
+    "lint:js": "eslint --no-eslintrc --config assets/src/.eslintrc.cjs --ignore-pattern app.js assets/src/js",
+    "format:check": "prettier --check assets/src/css assets/src/js/state.js assets/src/js/api.js assets/src/js/queue.js assets/src/js/plans.js assets/src/js/audit.js assets/src/js/modals.js",
+    "lint": "npm run lint:js && npm run format:check && node --check assets/src/js/app.js && node --check assets/console.js",
+    "test": "node tests/autodetect-cases.mjs && node tests/console-build-cases.mjs"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^30.24.0",
+    "eslint": "^8.57.1",
+    "prettier": "^3.9.6"
+  }
+}

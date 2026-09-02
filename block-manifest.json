@@ -1,0 +1,112 @@
+{
+  "version": 1,
+  "blocks": {
+    "acf/hero": {
+      "purpose": "Hero section with a headline and supporting copy",
+      "allowed_ops": ["read", "insert", "update", "remove"],
+      "max_per_page": 1,
+      "allowed_parents": ["root"],
+      "safe_defaults": {
+        "heading": "Build better content workflows",
+        "subheading": "Plan, preview, and apply allowlisted block changes."
+      },
+      "required_on_insert": ["heading"],
+      "field_aliases": {
+        "title": "heading",
+        "headline": "heading",
+        "subtitle": "subheading"
+      }
+    },
+    "acf/testimonials": {
+      "purpose": "Customer testimonials",
+      "allowed_ops": ["read", "insert", "update", "remove"],
+      "max_per_page": null,
+      "allowed_parents": ["root"],
+      "safe_defaults": {
+        "testimonials": [
+          {
+            "name": "Alex Rivera",
+            "quote": "Build better content workflows"
+          }
+        ]
+      },
+      "required_on_insert": ["testimonials"],
+      "required_repeater_subfields": {
+        "testimonials": ["name", "quote"]
+      },
+      "field_aliases": {
+        "items": "testimonials",
+        "entries": "testimonials",
+        "slides": "testimonials"
+      }
+    },
+    "acf/feature-grid": {
+      "purpose": "Feature grid of benefits",
+      "allowed_ops": ["read", "insert", "update", "remove"],
+      "max_per_page": null,
+      "allowed_parents": ["root"],
+      "safe_defaults": {
+        "heading": "Build better content workflows",
+        "features": [
+          {
+            "title": "Plan first"
+          },
+          {
+            "title": "Review the diff"
+          },
+          {
+            "title": "Apply as a person"
+          }
+        ]
+      },
+      "required_on_insert": ["features"],
+      "required_repeater_subfields": {
+        "features": ["title"]
+      },
+      "field_aliases": {
+        "items": "features",
+        "cards": "features"
+      }
+    },
+    "acf/faq": {
+      "purpose": "Frequently asked questions",
+      "allowed_ops": ["read", "insert", "update", "remove"],
+      "max_per_page": null,
+      "allowed_parents": ["root"],
+      "safe_defaults": {
+        "faq_items": [
+          {
+            "question": "Who can apply a plan?",
+            "answer": "Only a logged-in person at the site. Agents may plan."
+          }
+        ]
+      },
+      "required_on_insert": ["faq_items"],
+      "required_repeater_subfields": {
+        "faq_items": ["question", "answer"]
+      },
+      "field_aliases": {
+        "faqs": "faq_items",
+        "items": "faq_items",
+        "questions": "faq_items"
+      }
+    },
+    "acf/call-to-action": {
+      "purpose": "Call to action",
+      "allowed_ops": ["read", "insert", "update", "remove"],
+      "max_per_page": null,
+      "allowed_parents": ["root"],
+      "safe_defaults": {
+        "heading": "Build better content workflows",
+        "button_text": "Get started",
+        "button_url": "#"
+      },
+      "required_on_insert": ["heading", "button_text"],
+      "field_aliases": {
+        "title": "heading",
+        "cta": "button_text",
+        "url": "button_url"
+      }
+    }
+  }
+}
