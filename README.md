@@ -1,5 +1,7 @@
 # Struo
 
+[![CI](https://github.com/rremedio-web/struo-public/actions/workflows/ci.yml/badge.svg)](https://github.com/rremedio-web/struo-public/actions/workflows/ci.yml)
+
 Agents may plan. Only a person applies.
 
 Struo is a WordPress plugin for AI-assisted Gutenberg and ACF edits. Every change goes through **plan → preview → approve → apply**. Fail-closed page and block allowlists, durable plans, human approval, audit records, and provider protections. Autonomous tools cannot cash in a write token.
