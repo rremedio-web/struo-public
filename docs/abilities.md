@@ -65,7 +65,7 @@ There is no redeemable token in the agent response.
 
 ## Overrides
 
-`mcp.public` can be flipped per ability with the `struo_ability_mcp_public` filter (legacy alias `subsurface_ai_ability_mcp_public`), except `struo/apply-agent-plan`, which is forced false after those filters. There is no Settings checkbox that bulk-opens writes.
+`mcp.public` can be flipped per ability with the `struo_ability_mcp_public` filter, except `struo/apply-agent-plan`, which is forced false after that filter. There is no Settings checkbox that bulk-opens writes.
 
 ## WordPress 7 Client
 

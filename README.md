@@ -1,8 +1,10 @@
 # Struo
 
-Struo is an experimental WordPress plugin for planning and reviewing AI-assisted Gutenberg and ACF changes. It uses fail-closed page and block allowlists, durable plans, human approval, audit records and provider protections so autonomous tools cannot directly apply content changes.
+Agents may plan. Only a person applies.
 
-This is a portfolio / lab build, not a hosted product. Treat it as experimental. Requires **WordPress 6.9** (Abilities API) and **PHP 8.2**. WordPress 7.0 Client / Connectors are used when present. Fresh installs are fail-closed: no pages are editable until an administrator allowlists them. Agents may plan. Only a logged-in person at the site applies.
+Struo is a WordPress plugin for AI-assisted Gutenberg and ACF edits. Every change goes through **plan → preview → approve → apply**. Fail-closed page and block allowlists, durable plans, human approval, audit records, and provider protections. Autonomous tools cannot cash in a write token.
+
+Requires **WordPress 6.9** (Abilities API) and **PHP 8.2**. WordPress 7.0 Client / Connectors are used when present. This is a lab plugin, not a hosted product. Fresh installs are fail-closed: no pages are editable until an administrator allowlists them.
 
 ## Installation
 
