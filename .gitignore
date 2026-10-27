@@ -1,0 +1,11 @@
+.DS_Store
+node_modules/
+vendor/
+languages/*.pot
+.wp-env/
+phpcs.xml.local
+dist/
+.serena/
+.playwright-mcp/
+create-flow-result.md
+mission-brief-typed.png

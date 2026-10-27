@@ -1,0 +1,10 @@
+title = "Struo"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Harness fixtures use fake keys; they are not production secrets."
+paths = [
+  '''(^|/)tests/''',
+]

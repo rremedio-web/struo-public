@@ -1,0 +1,49 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Struo">
+	<description>
+		Blocking WordPress standard for extracted modules. struo.php stays a
+		separate report-only CI step until further splits. Table-name SQL interpolation
+		and Yoda/one-class-per-file are baseline exclusions, not a rewrite.
+	</description>
+
+	<file>includes</file>
+	<file>src</file>
+	<file>provider-url-guard.php</file>
+	<file>uninstall.php</file>
+
+	<arg name="extensions" value="php"/>
+	<arg name="basepath" value="."/>
+	<arg value="s"/>
+
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<exclude-pattern>*/node_modules/*</exclude-pattern>
+	<exclude-pattern>*/dist/*</exclude-pattern>
+	<exclude-pattern>*/tests/*</exclude-pattern>
+	<exclude-pattern>*/src/work-queue/*</exclude-pattern>
+	<exclude-pattern>*/src/gutenberg-host/*</exclude-pattern>
+
+	<rule ref="WordPress">
+		<exclude name="Generic.Arrays.DisallowShortArraySyntax"/>
+		<exclude name="Universal.Arrays.DisallowShortArraySyntax"/>
+		<exclude name="WordPress.Files.FileName"/>
+		<exclude name="WordPress.Arrays.MultipleStatementAlignment"/>
+		<exclude name="Generic.Formatting.MultipleStatementAlignment"/>
+		<exclude name="WordPress.Arrays.ArrayDeclarationSpacing"/>
+		<exclude name="WordPress.Arrays.ArrayIndentation"/>
+		<exclude name="PEAR.Functions.FunctionCallSignature"/>
+		<exclude name="Generic.Functions.FunctionCallArgumentSpacing"/>
+		<exclude name="Squiz.Commenting.FileComment"/>
+		<exclude name="Squiz.Commenting.ClassComment"/>
+		<exclude name="Squiz.Commenting.FunctionComment"/>
+		<exclude name="Squiz.Commenting.FunctionCommentThrowTag"/>
+		<exclude name="Squiz.Commenting.VariableComment"/>
+		<exclude name="Squiz.Commenting.InlineComment"/>
+		<exclude name="Generic.Commenting.DocComment"/>
+		<exclude name="WordPress.WP.I18n"/>
+		<exclude name="Generic.Files.OneObjectStructurePerFile"/>
+		<exclude name="WordPress.PHP.YodaConditions"/>
+		<exclude name="WordPress.DB.PreparedSQL.InterpolatedNotPrepared"/>
+		<exclude name="WordPress.DB.PreparedSQL.NotPrepared"/>
+		<exclude name="WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare"/>
+	</rule>
+</ruleset>

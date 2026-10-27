@@ -1,0 +1,9 @@
+node_modules
+vendor
+dist
+assets/console.js
+assets/console.css
+assets/src/js/app.js
+assets/work-queue.js
+assets/gutenberg-host.js
+package-lock.json
