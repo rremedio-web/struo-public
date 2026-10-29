@@ -1437,7 +1437,7 @@ if grep -q '9e72090525849c5e82e596468b86eb55e9cc5331' "$CI"; then
 else
 	pass "CI does not pin the unresolvable setup-php SHA"
 fi
-check_grep "setup-php pin is 2.35.5 commit" "$CI" "shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f"
+check_grep "setup-php pin is 2.40.0 commit" "$CI" "shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962"
 USES_COUNT=$(grep -cE '^[[:space:]]+-?[[:space:]]*uses:' "$CI" || true)
 SHA_PINS=$(grep -cE 'uses: .*@[0-9a-f]{40}$' "$CI" || true)
 if [ "$USES_COUNT" -eq "$SHA_PINS" ] && [ "$SHA_PINS" -ge 3 ]; then

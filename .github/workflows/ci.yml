@@ -21,21 +21,21 @@ jobs:
         php: ['8.2', '8.3', '8.4', '8.5']
 
     steps:
-      # actions/checkout v4.2.2
+      # actions/checkout v5.0.0
       # Full history so the Gitleaks history scan sees every commit, not just HEAD.
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           fetch-depth: 0
 
-      # shivammathur/setup-php 2.35.5 (commit object, not a tag SHA)
-      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f
+      # shivammathur/setup-php 2.40.0 (commit object, not a tag SHA)
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: ${{ matrix.php }}
           coverage: none
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
-      # actions/setup-node v4.4.0 — PHP 8.2 owns Node syntax, npm lint, and zip drift.
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      # actions/setup-node v5.0.0 — PHP 8.2 owns Node syntax, npm lint, and zip drift.
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         if: matrix.php == '8.2'
         with:
           node-version: '20'
@@ -105,11 +105,14 @@ jobs:
           --runtime-set ignore_warnings_on_exit 1
 
       # Report-only until further struo.php splits. Do not remove
-      # continue-on-error from this step onto the god class.
+      # continue-on-error from this step onto the god class. Same ruleset
+      # as the blocking step, summary output only, PHP 8.2 only.
       - name: PHPCS WordPress standard on struo.php (report-only)
+        if: matrix.php == '8.2'
         continue-on-error: true
         run: >
-          vendor/bin/phpcs --standard=WordPress --extensions=php
+          vendor/bin/phpcs -d memory_limit=1G --standard=phpcs.xml.dist
+          --report=summary --report-source
           struo.php
 
   eval-lite:
@@ -130,13 +133,13 @@ jobs:
     steps:
       # Checkout as struo/ so wp-env mounts wp-content/plugins/struo even
       # when the GitHub repository folder is named struo-public.
-      # actions/checkout v4.2.2
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      # actions/checkout v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           path: struo
 
-      # actions/setup-node v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      # actions/setup-node v5.0.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version: '20'
 
@@ -174,13 +177,13 @@ jobs:
           - wp: '7.1'
             config: .wp-env.7.1.json
     steps:
-      # actions/checkout v4.2.2
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      # actions/checkout v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
         with:
           path: struo
 
-      # actions/setup-node v4.4.0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+      # actions/setup-node v5.0.0
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
         with:
           node-version: '20'
 
@@ -207,11 +210,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      # actions/checkout v4.2.2
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      # actions/checkout v5.0.0
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8
 
-      # shivammathur/setup-php 2.35.5
-      - uses: shivammathur/setup-php@bf6b4fbd49ca58e4608c9c89fba0b8d90bd2a39f
+      # shivammathur/setup-php 2.40.0 (commit object, not a tag SHA)
+      - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962
         with:
           php-version: '8.2'
           coverage: none
@@ -232,9 +235,9 @@ jobs:
           sha256sum "$zip" | tee "${zip}.sha256"
           sha256sum -c "${zip}.sha256"
 
-      # actions/upload-artifact v4.6.2
+      # actions/upload-artifact v6.0.0
       - name: Upload release zip artifact
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
         with:
           name: struo-release
           path: |

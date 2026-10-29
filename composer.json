@@ -18,8 +18,8 @@
     },
     "scripts": {
         "lint": "phpcs --standard=phpcs.xml.dist",
-        "lint:godclass": "phpcs --standard=WordPress --extensions=php struo.php",
-        "test": "php tests/provider-url-cases.php && php tests/rate-limit-cases.php && php tests/plugin-entry-deactivate-cases.php",
+        "lint:godclass": "phpcs -d memory_limit=1G --standard=phpcs.xml.dist --report=summary --report-source struo.php",
+        "test": "php tests/provider-url-cases.php && php tests/rate-limit-cases.php && php tests/plugin-entry-deactivate-cases.php && php tests/durable-plan-store-cases.php",
         "smoke": "bash tests/smoke.sh"
     },
     "config": {

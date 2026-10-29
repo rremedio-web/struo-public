@@ -6,7 +6,7 @@
    PHP lint, structural greps, provider-URL cases, rate-limit cases, zip contents. No WordPress required.
 
 2. **Pure-PHP cases** — `composer test`  
-   `tests/provider-url-cases.php`, `tests/rate-limit-cases.php`, `tests/plugin-entry-deactivate-cases.php`. Redirect hops and rejected hosts live in the provider-URL script.
+   `tests/provider-url-cases.php`, `tests/rate-limit-cases.php`, `tests/plugin-entry-deactivate-cases.php`, `tests/durable-plan-store-cases.php`. Redirect hops and rejected hosts live in the provider-URL script.
 
 3. **Console assets** — `npm run lint` and `npm test`  
    ESLint and Prettier on extracted `assets/src` modules, `node --check` on `app.js` / `assets/console.js`, plus `tests/console-build-cases.mjs`.

@@ -14,8 +14,8 @@
 
 ```bash
 composer install
-composer lint          # PHPCS on includes/ + src/ (blocking)
-composer test          # pure-PHP cases (provider URL, rate limit, deactivate)
+composer lint          # PHPCS on includes/, src/, provider-url-guard.php, uninstall.php (blocking)
+composer test          # pure-PHP cases (provider URL, rate limit, deactivate, plan store)
 bash tests/smoke.sh    # static harness, including release zip
 npm install
 npm run build          # Work Queue + Gutenberg host + console concat
