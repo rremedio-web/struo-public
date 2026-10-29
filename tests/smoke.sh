@@ -792,6 +792,16 @@ check_grep "status reports plan spend" "$MAIN" "'plan_spend' => self::get_plan_s
 check_grep "status reports text_generation flag" "$MAIN" "'text_generation' => self::wp_ai_client_has_text_generation(),"
 check_grep "uninstall removes last-hop option" "$UNINSTALL" "'struo_planner_last_hop'"
 check_grep "uninstall removes daily spend rows" "$UNINSTALL" "'struo_plan_spend_'"
+check_grep "uninstall removes struo_rl_ counters" "$UNINSTALL" "'struo_rl_'"
+check_grep "uninstall removes Struo caps from every role" "$UNINSTALL" "remove_cap( \$struo_cap )"
+for cap in struo_plan struo_approve struo_apply struo_manage_registry struo_manage_settings; do
+	check_grep "uninstall lists cap $cap" "$UNINSTALL" "'$cap',"
+done
+if fn_body "$MAIN" maybe_eval_crash_apply | grep -q STRUO_EVAL_HARNESS; then
+	pass "crash-injection filter runs only under STRUO_EVAL_HARNESS"
+else
+	fail "crash-injection filter runs only under STRUO_EVAL_HARNESS"
+fi
 check_body_absent "no prompt text in last-hop writer" "$MAIN" "record_planner_hop" "'prompt' =>"
 check_grep "console mentions missing text_generation" "$PLUGIN_DIR/assets/console.js" "no text_generation model"
 

@@ -5313,6 +5313,10 @@ foreach ( [ '\_transient\_sae\_%', '\_transient\_struo\_%', '\_transient\_timeou
 
 $GLOBALS['struo_eval_saved_rows']       = $saved_rows;
 $GLOBALS['struo_eval_saved_transients'] = $saved_transients;
+// uninstall.php strips the Struo caps from every role; roles live in the
+// {prefix}user_roles option, outside the struo_ snapshot above.
+$GLOBALS['struo_eval_roles_key']   = wp_roles()->role_key;
+$GLOBALS['struo_eval_saved_roles'] = get_option( wp_roles()->role_key );
 
 function struo_eval_restore_uninstall_state() {
 	global $wpdb;
@@ -5330,6 +5334,10 @@ function struo_eval_restore_uninstall_state() {
 			$wpdb->insert( $wpdb->options, [ 'option_name' => $row['option_name'], 'option_value' => $row['option_value'], 'autoload' => $row['autoload'] ], [ '%s', '%s', '%s' ] );
 		}
 	}
+	if ( is_array( $GLOBALS['struo_eval_saved_roles'] ?? null ) ) {
+		update_option( (string) $GLOBALS['struo_eval_roles_key'], $GLOBALS['struo_eval_saved_roles'] );
+		wp_roles()->for_site();
+	}
 }
 
 // Seed struo_* rows, one foreign option, and one transient per generation.
@@ -5339,6 +5347,7 @@ update_option( $legacy_key, [ 'kill_switch' => 1 ], false );
 set_transient( 'struo_confirm_wp_eval', 'x', 600 );
 set_transient( 'sae_confirm_wp_eval', 'x', 600 );
 update_option( 'struo_transients_migrated_v1', 1, false );
+update_option( 'struo_rl_wp_eval_0', 1, false );
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	define( 'WP_UNINSTALL_PLUGIN', true );
@@ -5354,6 +5363,12 @@ delete_option( $legacy_key );
 check( '(r3) struo_ generation transient removed', false === get_transient( 'struo_confirm_wp_eval' ) );
 check( '(r3) legacy sae_ generation transient removed', false === get_transient( 'sae_confirm_wp_eval' ) );
 check( '(r3) transients-migrated flag removed by uninstall', false === get_option( 'struo_transients_migrated_v1', false ) );
+check( '(r3) rate-limit counter rows removed by uninstall', false === get_option( 'struo_rl_wp_eval_0', false ) );
+$r3_admin_role = get_role( 'administrator' );
+check(
+	'(r3) uninstall removes Struo caps from the administrator role',
+	$r3_admin_role instanceof WP_Role && ! $r3_admin_role->has_cap( 'struo_plan' ) && ! $r3_admin_role->has_cap( 'struo_apply' )
+);
 check(
 	'(s0b) uninstall keeps the plans table by default',
 	$plans_table_before_uninstall && struo_eval_table_exists( struo_eval_plans_table() ),
@@ -5362,6 +5377,8 @@ check(
 
 struo_eval_restore_uninstall_state();
 check( '(r3) pre-uninstall state restored transactionally', is_array( get_option( 'struo_options', [] ) ) );
+$r3_admin_role = get_role( 'administrator' );
+check( '(r3) administrator caps restored after the uninstall case', $r3_admin_role instanceof WP_Role && $r3_admin_role->has_cap( 'struo_plan' ) );
 
 // Block-editor host: named live/browser proofs. Manual only; not run by this file.
 // (s5-e1) Hello world in the block editor: Target is Hello world; Work Queue, Multi-page, Findings, compose in the Struo sidebar

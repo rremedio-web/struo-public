@@ -24,5 +24,7 @@ WordPress personal-data export/erase for audit and plan rows is scoped to the re
 
 ## Uninstall
 
-`uninstall.php` deletes Struo's options, its `struo_*` transients and `sae_*` transients written under the plugin's earlier key prefix. The audit and plans tables stay unless `STRUO_DROP_AUDIT_TABLE_ON_UNINSTALL` / `STRUO_DROP_PLANS_TABLE_ON_UNINSTALL` is defined as true.
+`uninstall.php` deletes Struo's options, its `struo_*` transients and `sae_*` transients written under the plugin's earlier key prefix, the daily planner-spend rows (`struo_plan_spend_*`) and the atomic rate-limit counters (`struo_rl_*`). It also removes the five Struo capabilities (`struo_plan`, `struo_approve`, `struo_apply`, `struo_manage_registry`, `struo_manage_settings`) from every role. The audit and plans tables stay unless `STRUO_DROP_AUDIT_TABLE_ON_UNINSTALL` / `STRUO_DROP_PLANS_TABLE_ON_UNINSTALL` is defined as true; the legacy `SAE_DROP_AUDIT_TABLE_ON_UNINSTALL` / `SAE_DROP_PLANS_TABLE_ON_UNINSTALL` names are still read, and win if both are defined.
+
+The plan rate-limit transients (`struo_plan_rate_*`) and the `struo_rl_*` counters are cleared only on uninstall, not on deactivation, so toggling the plugin cannot reset those quotas.
 

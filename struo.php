@@ -10545,7 +10545,19 @@ final class Struo_Block_Editor {
 		);
 	}
 
+	/**
+	 * Test-only crash injection for the apply journal evals.
+	 *
+	 * Does nothing unless STRUO_EVAL_HARNESS is defined and true (the
+	 * eval files define it). On a normal site the struo_eval_crash_apply
+	 * filter is never run, so no other plugin can abort an apply with it.
+	 *
+	 * @return true|WP_Error WP_Error only when the harness asks to crash at $stage.
+	 */
 	private static function maybe_eval_crash_apply( $stage, $plan_id ) {
+		if ( ! defined( 'STRUO_EVAL_HARNESS' ) || ! STRUO_EVAL_HARNESS ) {
+			return true;
+		}
 		$stage = sanitize_key( (string) $stage );
 		$want = apply_filters( 'struo_eval_crash_apply', '', (string) $plan_id );
 		if ( $stage === sanitize_key( (string) $want ) ) {

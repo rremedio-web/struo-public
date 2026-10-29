@@ -10,8 +10,12 @@
  * STRUO_DROP_PLANS_TABLE_ON_UNINSTALL (or SAE_DROP_PLANS_TABLE_ON_UNINSTALL)
  * is defined as true. The audit-drop constant does not drop plans.
  *
- * The sae_plan_rate_ family is cleaned here but deliberately NOT on
- * deactivation, so toggling the plugin cannot reset plan rate-limit quotas.
+ * It also deletes the atomic rate-limit counters (struo_rl_* options) and
+ * removes the five Struo capabilities from every role.
+ *
+ * The struo_plan_rate_ transient family (plus its legacy sae_ twin) and the
+ * struo_rl_* counters are cleaned here but deliberately NOT on
+ * deactivation, so toggling the plugin cannot reset those quotas.
  *
  * Option and transient names mirror the constants declared in struo.php;
  * this file runs without the plugin loaded, so the literals are repeated
@@ -132,6 +136,33 @@ $struo_spend_rows = $wpdb->get_col(
 if ( is_array( $struo_spend_rows ) ) {
 	foreach ( $struo_spend_rows as $struo_spend_row ) {
 		delete_option( (string) $struo_spend_row );
+	}
+}
+
+// Atomic rate-limit counters (Struo_Rate_Limit_Cas::OPTION_PREFIX).
+$struo_rl_rows = $wpdb->get_col(
+	$wpdb->prepare(
+		"SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s",
+		$wpdb->esc_like( 'struo_rl_' ) . '%'
+	)
+);
+if ( is_array( $struo_rl_rows ) ) {
+	foreach ( $struo_rl_rows as $struo_rl_row ) {
+		delete_option( (string) $struo_rl_row );
+	}
+}
+
+// Capabilities granted on activation (Struo_Block_Editor::CAP_STRUO_*).
+$struo_caps = [
+	'struo_plan',
+	'struo_approve',
+	'struo_apply',
+	'struo_manage_registry',
+	'struo_manage_settings',
+];
+foreach ( wp_roles()->role_objects as $struo_role ) {
+	foreach ( $struo_caps as $struo_cap ) {
+		$struo_role->remove_cap( $struo_cap );
 	}
 }
 
