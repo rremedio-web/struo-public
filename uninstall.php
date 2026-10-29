@@ -13,9 +13,11 @@
  * It also deletes the atomic rate-limit counters (struo_rl_* options) and
  * removes the five Struo capabilities from every role.
  *
- * The struo_plan_rate_ transient family (plus its legacy sae_ twin) and the
- * struo_rl_* counters are cleaned here but deliberately NOT on
- * deactivation, so toggling the plugin cannot reset those quotas.
+ * The plan and write rate limits are counted in those struo_rl_* options
+ * (or the object cache). They are cleaned here but deliberately NOT on
+ * deactivation, so toggling the plugin cannot reset a quota. The
+ * struo_plan_rate_ / sae_plan_rate_ transient families swept below are
+ * what earlier versions used for the same limit.
  *
  * Option and transient names mirror the constants declared in struo.php;
  * this file runs without the plugin loaded, so the literals are repeated
