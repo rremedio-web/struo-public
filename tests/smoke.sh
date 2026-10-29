@@ -378,17 +378,7 @@ if printf '%s' "$MINT_BODY" | grep -q "'redeemable' => true"; then
 else
 	pass "issue_confirmation_token never returns redeemable true"
 fi
-CREATE_MINT_BODY="$(fn_body "$MAIN" "issue_create_confirmation_token")"
-if printf '%s' "$CREATE_MINT_BODY" | grep -q 'mcp_dry_run_token_suppressed'; then
-	pass "create-page minting suppresses tokens for MCP origin too"
-else
-	fail "create-page minting suppresses tokens for MCP origin too"
-fi
-if printf '%s' "$CREATE_MINT_BODY" | grep -q 'set_transient('; then
-	fail "issue_create_confirmation_token never stores a confirmation transient"
-else
-	pass "issue_create_confirmation_token never stores a confirmation transient"
-fi
+check_count "one confirmation-token helper (no create-page twin)" "$MAIN" "function issue_[a-z_]*confirmation_token" 1
 check_count "no public/static origin switch" "$MAIN" "public static function set_token_origin" 0
 check_count "no static origin property" "$MAIN" 'static $token_origin' 0
 if grep -qF "set_attributes(" "$MAIN" && awk '/public static function dispatch_internal/,/^	}/' "$MAIN" | grep -q "struo_origin"; then
@@ -807,17 +797,17 @@ check_grep "console mentions missing text_generation" "$PLUGIN_DIR/assets/consol
 
 echo "== 7d. Agent plan inbox =="
 check_grep "agent plan store option" "$MAIN" "const AGENT_PLANS_OPTION = 'struo_agent_plans'"
-check_grep "MCP plans persist through persist_mcp_agent_plan" "$MAIN" "persist_mcp_agent_plan"
+check_grep "durable mutation plans persist through create_durable_mutation_plan" "$MAIN" "function create_durable_mutation_plan"
 check_grep "console status lists agent_plans" "$MAIN" "'agent_plans' => self::list_agent_plan_summaries()"
 check_grep "Mission Brief has Multi-page and new pages" "$MAIN" "Multi-page and new pages"
 check_grep "console wires agent plan inbox" "$PLUGIN_DIR/assets/console.js" "function renderAgentPlansInbox"
 check_grep "console reviews via REST preview" "$PLUGIN_DIR/assets/console.js" "agentPlansEndpoint(planId, 'preview')"
 check_grep "uninstall deletes agent plan store" "$UNINSTALL" "'struo_agent_plans'"
 PERSIST_BODY="$(fn_body "$MAIN" "create_durable_mutation_plan")"
-if printf '%s' "$PERSIST_BODY" | grep -q "mcp' !== self::normalize_token_origin" || printf '%s' "$(fn_body "$MAIN" "persist_mcp_agent_plan")" | grep -q "mcp' !== self::normalize_token_origin"; then
-	pass "persist refuses non-mcp origins"
+if printf '%s' "$PERSIST_BODY" | grep -qF "in_array( \$origin, [ 'mcp', 'rest' ], true )"; then
+	pass "persist accepts only mcp and rest origins"
 else
-	fail "persist refuses non-mcp origins"
+	fail "persist accepts only mcp and rest origins"
 fi
 if printf '%s' "$PERSIST_BODY" | grep -q "strip_redeemable_fields"; then
 	pass "persist strips confirmation before storage"

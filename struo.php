@@ -345,6 +345,8 @@ endif;
 // plugin folders), only one class definition may ever exist.
 if ( ! class_exists( 'Struo_Block_Editor' ) ):
 
+// Loaded before the class body: AGENT_PLAN_MAX aliases
+// Struo_Durable_Plans::ACTIVE_CAP, so the class must exist first.
 require_once __DIR__ . '/includes/class-durable-plans.php';
 
 final class Struo_Block_Editor {
@@ -7447,14 +7449,6 @@ final class Struo_Block_Editor {
 		return is_array( $stored ) ? $stored : null;
 	}
 
-	private static function delete_create_plan_snapshot( $idempotency_key ) {
-		if ( '' === $idempotency_key ) {
-			return;
-		}
-		$cache_key = self::get_create_plan_cache_key( $idempotency_key );
-		delete_transient( $cache_key );
-	}
-
 	private static function build_create_operation_payload( $action, $idempotency_key, array $plan_snapshot, array $extra_payload = [] ) {
 		$base_payload = [
 			'idempotency_key' => (string) $idempotency_key,
@@ -7476,11 +7470,12 @@ final class Struo_Block_Editor {
 		);
 	}
 
+	/**
+	 * Hash a create-page plan snapshot. Same keyed hash as operation
+	 * payloads: HMAC-SHA256 of the canonical JSON, keyed with wp_salt('auth').
+	 */
 	private static function hash_create_plan_snapshot( array $plan_snapshot ) {
-		$canonical = self::canonicalize_value( $plan_snapshot );
-		$json = wp_json_encode( $canonical );
-		$salt = wp_salt( 'auth' );
-		return hash_hmac( 'sha256', (string) $json, (string) $salt );
+		return self::hash_operation_payload( $plan_snapshot );
 	}
 
 	private static function generate_page_copy( $template_key, $description, $title, array $context = [] ) {
@@ -9184,12 +9179,12 @@ final class Struo_Block_Editor {
 	}
 
 	private static function plan_spend_option_key() {
-		$day = function_exists( 'wp_date' ) ? wp_date( 'Ymd' ) : gmdate( 'Ymd' );
+		$day = wp_date( 'Ymd' );
 		return self::PLAN_SPEND_OPTION_PREFIX . preg_replace( '/[^0-9]/', '', (string) $day );
 	}
 
 	private static function plan_spend_reset_at() {
-		$tz = function_exists( 'wp_timezone' ) ? wp_timezone() : new DateTimeZone( 'UTC' );
+		$tz = wp_timezone();
 		try {
 			$now = new DateTimeImmutable( 'now', $tz );
 			return $now->setTime( 0, 0, 0 )->modify( '+1 day' )->getTimestamp();
@@ -10605,35 +10600,6 @@ final class Struo_Block_Editor {
 		}
 
 		return is_array( $preview ) ? (string) ( $preview['serialized_content'] ?? '' ) : '';
-	}
-
-	private static function update_durable_plan_payload( $id, array $payload ) {
-		global $wpdb;
-
-		if ( ! self::plans_table_exists() ) {
-			return false;
-		}
-
-		$id = (string) $id;
-		if ( ! self::validate_agent_plan_id( $id ) ) {
-			return false;
-		}
-
-		$encoded = wp_json_encode( self::strip_redeemable_fields( $payload ) );
-		if ( false === $encoded ) {
-			return false;
-		}
-
-		$table = self::get_plans_table_name();
-		$updated = $wpdb->update(
-			$table,
-			[ 'payload_json' => $encoded ],
-			[ 'plan_id' => $id ],
-			[ '%s' ],
-			[ '%s' ]
-		);
-
-		return false !== $updated;
 	}
 
 	private static function approve_bundle_plan( $id, array $record, WP_REST_Request $request ) {
@@ -12480,35 +12446,6 @@ final class Struo_Block_Editor {
 		self::prune_durable_plans( [ $id ] );
 
 		return $id;
-	}
-
-	/**
-	 * @deprecated Use attach_durable_page_spec_envelope / create_durable_page_spec_plan.
-	 */
-	private static function attach_durable_create_plan_envelope( $origin, array $response, ?array $merge_into = null ) {
-		return self::attach_durable_page_spec_envelope( $origin, $response, $merge_into );
-	}
-
-	/**
-	 * @deprecated Use create_durable_page_spec_plan.
-	 */
-	private static function create_durable_create_plan( $origin, array $response ) {
-		return self::create_durable_page_spec_plan( $origin, $response );
-	}
-
-	/**
-	 * Queue an MCP/Abilities plan for Mission Brief review. Never stores a
-	 * confirmation token. REST/console plans are not queued — the operator
-	 * already has the review panel.
-	 *
-	 * @return string Queued plan id, or empty string when not queued.
-	 */
-	private static function persist_mcp_agent_plan( $origin, array $response ) {
-		if ( 'mcp' !== self::normalize_token_origin( $origin ) ) {
-			return '';
-		}
-
-		return self::create_durable_mutation_plan( $origin, $response );
 	}
 
 	private static function sanitize_agent_plan_endpoint( $endpoint ) {
@@ -19725,7 +19662,7 @@ final class Struo_Block_Editor {
 
 	private static function get_parent_by_path( array &$blocks, array $path ) {
 		$current =& $blocks;
-		foreach ( $path as $depth => $index ) {
+		foreach ( $path as $index ) {
 			if ( ! isset( $current[ $index ] ) ) {
 				return new WP_Error( 'sae_invalid_parent', 'Parent block path is invalid.', [ 'status' => 400 ] );
 			}
@@ -20018,34 +19955,6 @@ final class Struo_Block_Editor {
 		}
 
 		return true;
-	}
-
-	private static function issue_create_confirmation_token( array $operation, array $plan_snapshot, $origin = 'rest', array $context = [] ) {
-		unset( $plan_snapshot );
-		$origin = self::normalize_token_origin( $origin );
-
-		if ( 'mcp' === $origin ) {
-			self::audit_log(
-				'mcp_dry_run_token_suppressed',
-				[
-					'action' => sanitize_key( (string) ( $operation['action'] ?? '' ) ),
-					'post_id' => 0,
-					'tool' => sanitize_key( (string) ( $context['tool'] ?? '' ) ),
-					'request_id' => sanitize_text_field( (string) ( $context['request_id'] ?? '' ) ),
-				]
-			);
-			return [
-				'redeemable' => false,
-				'origin' => $origin,
-				'message' => 'Dry-run only: MCP-originated plans do not receive a redeemable confirmation token. Apply from the console.',
-			];
-		}
-
-		return [
-			'redeemable' => false,
-			'origin' => $origin,
-			'message' => 'Plan-only: approve and apply via the durable plan envelope.',
-		];
 	}
 
 	private static function normalize_idempotency_key( $value ) {
@@ -20590,14 +20499,15 @@ final class Struo_Block_Editor {
 	/**
 	 * Shared dispatcher for MCP tools and WP 6.9 Abilities.
 	 *
-	 * Always forces dry_run, strips confirmation tokens, and stamps
-	 * struo_origin=mcp so minting cannot close the apply loop. Apply stays
-	 * REST/console. The $origin argument is accepted for caller compatibility
-	 * and ignored.
+	 * Preview-only: always forces dry_run=true, drops any confirmation_token
+	 * the caller sent, and stamps struo_origin=mcp on the internal request.
+	 * Nothing dispatched here can write; apply happens only through an
+	 * approved durable plan in the REST/console flow.
 	 *
 	 * @param string $operation Operation key (ability or MCP alias).
 	 * @param array  $input     Tool/ability input.
-	 * @param string $origin    Ignored; this dispatcher always stamps mcp.
+	 * @param string $origin    Deprecated and ignored. Kept in the signature
+	 *                          because Struo_Abilities still passes it.
 	 * @param array  $context   Origin context (tool, request_id).
 	 * @return mixed
 	 */
@@ -22203,13 +22113,6 @@ final class Struo_Block_Editor {
 		return $summary;
 	}
 
-	public static function record_legacy_rest_route( $route ) {
-		self::audit_log(
-			'legacy_rest_route',
-			[ 'route' => sanitize_text_field( (string) $route ) ]
-		);
-	}
-
 	private static function audit_log( $action, array $details = [] ) {
 		if ( defined( 'STRUO_EVAL_HARNESS' ) && STRUO_EVAL_HARNESS ) {
 			$details['eval_harness'] = 1;
@@ -22243,7 +22146,6 @@ final class Struo_Block_Editor {
 
 require_once __DIR__ . '/includes/class-operation-catalog.php';
 require_once __DIR__ . '/includes/class-authority.php';
-require_once __DIR__ . '/includes/class-durable-plans.php';
 require_once __DIR__ . '/includes/class-mutation-journal.php';
 require_once __DIR__ . '/includes/class-mutation-recovery.php';
 require_once __DIR__ . '/includes/class-findings.php';
