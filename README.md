@@ -6,11 +6,21 @@ Agents may plan. Only a person applies. (MCP can never apply; see the [apply con
 
 Struo is a WordPress plugin for AI-assisted Gutenberg and ACF edits. Every change goes through **plan → preview → approve → apply**. Fail-closed page and block allowlists, durable plans, human approval, audit records, and provider protections. There is no write token for an agent to replay: a change is written only when a person applies an approved plan.
 
-Requires **WordPress 6.9** (Abilities API) and **PHP 8.2**. WordPress 7.0 Client / Connectors are used when present. This is a lab plugin, not a hosted product. Fresh installs are fail-closed: no pages are editable until an administrator allowlists them.
+## Why
+
+AI agents are good at drafting CMS edits and bad at knowing when they should not make them. Struo lets an agent (or a person typing a request) produce a concrete plan, and a person approves the exact diff before anything is written. Every step is recorded.
+
+```text
+Request → Plan → Durable plan → Approve → Apply → Audit
+```
+
+How the pieces fit: [docs/architecture.md](docs/architecture.md).
 
 ## Installation
 
-1. Copy the `struo` folder to `wp-content/plugins/`.
+Requires **WordPress 6.9** (Abilities API) and **PHP 8.2**. WordPress 7.0 Client / Connectors are used when present. This is a lab plugin, not a hosted product. Fresh installs are fail-closed: no pages are editable until an administrator allowlists them.
+
+1. Download `struo-x.y.z.zip` from [Releases](https://github.com/rremedio-web/struo-public/releases) (each release also has a `.sha256` file) and upload it under **Plugins → Add New → Upload Plugin**. Or clone this repository into `wp-content/plugins/struo`: the folder must be named `struo`, not `struo-public`.
 2. Activate per site (not as a network plugin).
 3. Open **Settings → Struo**. Allowlist the pages the console may touch.
 
@@ -31,19 +41,23 @@ On WordPress 7, Auto uses the site AI Client / Connectors. The OpenAI-compatible
 
 ## Two-minute demo
 
-1. Allowlist a page under Settings → Struo.
+You need a page with a heading block (`core/heading`). No AI provider is needed: the request below is handled by the built-in rule-based parser.
+
+1. Allowlist the page under Settings → Struo.
 2. Open **Struo** in the admin menu (Mission Brief).
-3. Name the page, describe a change such as “set the heading to Build better content workflows”, then **Plan**.
+3. Name the page and type `set heading to "Build better content workflows"`, then **Plan**. Quote the new value; without quotes the parser cannot tell the field from the value.
 4. Review the diff. **Approve**, then **Apply**. Nothing is written until Apply.
 5. The Work Queue card shows saved-to-WordPress versus the public page. Agents still cannot apply.
 
-![Mission Brief after opening a planned change](docs/demo-plan-review.png)
+![Mission Brief with an unquoted request: the parser asks for both a field and a value instead of guessing](docs/demo-plan-review.png)
+
+*The Mission Brief console. This request left the new value unquoted, so the parser refused to guess and asked for a field and a value.*
 
 Writes follow the [apply contract](docs/security-model.md#apply-contract): durable `plan_id` → approve → apply. A direct persist returns `sae_plan_apply_required`.
 
 ## Endpoints
 
-Namespace: `/wp-json/struo/v1`. Full map: [docs/rest-api.md](docs/rest-api.md).
+Namespace: `/wp-json/struo/v1`. Main routes: [docs/rest-api.md](docs/rest-api.md) (not yet a complete list).
 
 ### `GET /wp-json/struo/v1/block-catalog`
 
@@ -119,8 +133,10 @@ MCP-originated calls are dry-run only. Applying requires a person in the console
 ## Docs
 
 - [Architecture](docs/architecture.md)
-- [Security model](docs/security-model.md)
-- [REST API](docs/rest-api.md)
+- [Security model](docs/security-model.md) (including the apply contract)
+- [Configuration constants](docs/configuration.md)
+- [Abilities and MCP](docs/abilities.md)
+- [REST API](docs/rest-api.md) (main routes)
 - [Development](docs/development.md)
 - [Testing](docs/TESTING.md)
 - [Security reports](SECURITY.md)

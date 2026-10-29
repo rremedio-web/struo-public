@@ -1,6 +1,6 @@
 # Struo abilities
 
-Struo registers a small, allowlisted set of WordPress 6.9 abilities so MCP Adapter, AI Editor, and Kratt can discover the plugin without copying its UI.
+Struo registers a small, allowlisted set of WordPress 6.9 abilities so MCP Adapter, AI Editor, and other Abilities clients can discover the plugin without copying its UI.
 
 The allowlist plus the durable plan loop (`plan_id` → `struo_approve` →
 `struo_apply`) is the product; the rule is the

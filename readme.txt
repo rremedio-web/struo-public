@@ -8,9 +8,7 @@ Stable tag: 0.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Safe, allowlisted AI block editing for WordPress: plan → preview →
-approve → apply through durable plans, with idempotency, rate limits,
-and a full audit trail.
+AI-assisted Gutenberg and ACF edits that agents can plan but only a person can apply: plan, preview, approve, apply, with a full audit trail.
 
 == Description ==
 Struo exposes allowlisted REST endpoints and an admin console for
