@@ -20392,7 +20392,7 @@ final class Struo_Block_Editor {
 		];
 		$tools[] = [
 			'name' => 'struo_insert_block',
-			'description' => 'Insert an allowlisted block with fields.',
+			'description' => 'Preview inserting an allowlisted block with fields (dry run; nothing is written). Apply happens in the Struo console.',
 			'inputSchema' => [
 				'type' => 'object',
 				'properties' => [
@@ -20404,10 +20404,8 @@ final class Struo_Block_Editor {
 						'type' => 'array',
 						'items' => [ 'type' => 'integer' ],
 					],
-					'dry_run' => [ 'type' => 'boolean' ],
 					'compact' => [ 'type' => 'boolean' ],
 					'verbose' => [ 'type' => 'boolean' ],
-					'confirmation_token' => [ 'type' => 'string' ],
 					'idempotency_key' => [ 'type' => 'string' ],
 				],
 				'required' => [ 'post_id', 'block_name', 'fields' ],
@@ -20415,17 +20413,15 @@ final class Struo_Block_Editor {
 		];
 		$tools[] = [
 			'name' => 'struo_update_block',
-			'description' => 'Update an allowlisted block by target reference.',
+			'description' => 'Preview updating an allowlisted block by target reference (dry run; nothing is written). Apply happens in the Struo console.',
 			'inputSchema' => [
 				'type' => 'object',
 				'properties' => [
 					'post_id' => [ 'type' => 'integer' ],
 					'target' => [ 'type' => 'object' ],
 					'fields' => [ 'type' => 'object' ],
-					'dry_run' => [ 'type' => 'boolean' ],
 					'compact' => [ 'type' => 'boolean' ],
 					'verbose' => [ 'type' => 'boolean' ],
-					'confirmation_token' => [ 'type' => 'string' ],
 					'idempotency_key' => [ 'type' => 'string' ],
 				],
 				'required' => [ 'post_id', 'target', 'fields' ],
@@ -20433,7 +20429,7 @@ final class Struo_Block_Editor {
 		];
 		$tools[] = [
 			'name' => 'struo_remove_block',
-			'description' => 'Remove a block by target or remove all by block_name.',
+			'description' => 'Preview removing a block by target, or all blocks of block_name (dry run; nothing is written). Apply happens in the Struo console.',
 			'inputSchema' => [
 				'type' => 'object',
 				'properties' => [
@@ -20441,10 +20437,8 @@ final class Struo_Block_Editor {
 					'target' => [ 'type' => 'object' ],
 					'block_name' => [ 'type' => 'string' ],
 					'remove_all' => [ 'type' => 'boolean' ],
-					'dry_run' => [ 'type' => 'boolean' ],
 					'compact' => [ 'type' => 'boolean' ],
 					'verbose' => [ 'type' => 'boolean' ],
-					'confirmation_token' => [ 'type' => 'string' ],
 					'idempotency_key' => [ 'type' => 'string' ],
 				],
 				'required' => [ 'post_id' ],
@@ -20452,16 +20446,14 @@ final class Struo_Block_Editor {
 		];
 		$tools[] = [
 			'name' => 'struo_apply_batch',
-			'description' => 'Apply multiple insert/update/remove operations in one dry-run + confirmation cycle.',
+			'description' => 'Preview several insert/update/remove operations together (dry run; nothing is written; the name is kept for older clients). Apply happens in the Struo console.',
 			'inputSchema' => [
 				'type' => 'object',
 				'properties' => [
 					'post_id' => [ 'type' => 'integer' ],
 					'operations' => [ 'type' => 'array' ],
-					'dry_run' => [ 'type' => 'boolean' ],
 					'compact' => [ 'type' => 'boolean' ],
 					'verbose' => [ 'type' => 'boolean' ],
-					'confirmation_token' => [ 'type' => 'string' ],
 					'idempotency_key' => [ 'type' => 'string' ],
 				],
 				'required' => [ 'post_id', 'operations' ],
@@ -20474,8 +20466,9 @@ final class Struo_Block_Editor {
 	/**
 	 * MCP tool name → internal operation.
 	 *
-	 * Canonical names are struo_*. Previous plugin prefixes are derived so
-	 * already-connected agents keep working without a second catalog.
+	 * Canonical names are struo_*. Four unprefixed operation aliases are
+	 * kept for older clients. Every write-shaped name maps to a preview-*
+	 * operation: MCP can read, plan and preview, never apply.
 	 */
 	private static function mcp_operation_map() {
 		$canonical = [

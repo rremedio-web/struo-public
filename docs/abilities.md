@@ -44,7 +44,7 @@ Read, plan, and preview execute callbacks call `Struo_Block_Editor::dispatch_int
 
 `struo/apply-agent-plan` does **not** use `dispatch_internal`. It calls `apply_agent_plan()` with a durable `plan_id` after REST/console Approve. `issue_confirmation_token()` never stores a redeemable transient.
 
-AI Engine `struo_*` MCP tools (and previous plugin prefixes) use the same dispatcher as the preview/plan abilities. There is no MCP apply tool.
+AI Engine `struo_*` MCP tools (plus four unprefixed aliases kept for older clients: `insert-block`, `update-block`, `remove-block`, `apply-batch`) use the same dispatcher as the preview/plan abilities. The write-shaped tools only preview; their schemas do not offer `dry_run` or `confirmation_token`, and the dispatcher ignores both if a client still sends them. There is no MCP apply tool.
 
 ## Not registered
 

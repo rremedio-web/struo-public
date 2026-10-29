@@ -96,13 +96,15 @@ ability (`struo/apply-agent-plan`, not MCP-public) plus REST/console
 
 ## MCP Tools (AI Engine)
 
-- `struo_get_block_catalog`
-- `struo_list_post_blocks`
-- `struo_plan_block_change`
-- `struo_insert_block`
-- `struo_update_block`
-- `struo_remove_block`
-- `struo_apply_batch`
+| Tool | Kind |
+| --- | --- |
+| `struo_get_block_catalog` | read |
+| `struo_list_post_blocks` | read |
+| `struo_plan_block_change` | plan (optional preview) |
+| `struo_insert_block` | preview |
+| `struo_update_block` | preview |
+| `struo_remove_block` | preview |
+| `struo_apply_batch` | preview (historical name; it never applies) |
 
 MCP-originated calls are dry-run only. Applying requires a person in the console.
 

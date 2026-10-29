@@ -923,6 +923,8 @@ if printf '%s' "$MCP_TOOLS_BODY" | grep -q "apply-agent-plan"; then
 else
 	pass "MCP catalog has no apply-agent-plan tool"
 fi
+check_body_absent "MCP schemas do not advertise confirmation_token" "$MAIN" register_mcp_tools "'confirmation_token' =>"
+check_body_absent "MCP schemas do not advertise dry_run" "$MAIN" register_mcp_tools "'dry_run' =>"
 if printf '%s' "$PREVIEW_BODY" | grep -q "'plan_only' => true"; then
 	pass "operator preview uses plan-only dry-run"
 else
