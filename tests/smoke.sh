@@ -1947,6 +1947,9 @@ if php "$PLUGIN_DIR/tests/durable-plan-store-cases.php"; then
 else
 	fail "dps-sm1 durable-plan-store-cases.php all cases pass"
 fi
+for allow_case in allow-e1 allow-e2 allow-e3; do
+	check_grep "eval names ($allow_case) allowlist refusal" "$PLUGIN_DIR/tests/wp-eval-cases.php" "($allow_case)"
+done
 check_grep "dps eval names create/load" "$PLUGIN_DIR/tests/durable-plan-store-cases.php" "(dps-e1)"
 check_grep "dps eval names expire/illegal" "$PLUGIN_DIR/tests/durable-plan-store-cases.php" "(dps-e2)"
 check_grep "dps eval names prune expire" "$PLUGIN_DIR/tests/durable-plan-store-cases.php" "(dps-e3)"

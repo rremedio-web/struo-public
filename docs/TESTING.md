@@ -30,6 +30,7 @@ Eval and smoke labels carry an ID in parentheses. `-eN` is an eval case, `-smN` 
 
 | Prefix | Area |
 | --- | --- |
+| `allow` | Block and post allowlists refuse: no plan, no write |
 | `s0a`, `s0b` | Disclosure and copy; plan lifecycle and storage honesty |
 | `s1` | Authorization: one path for REST, MCP and Abilities |
 | `s2` | Immutable mutation journal |

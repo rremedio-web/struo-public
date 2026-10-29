@@ -3911,6 +3911,78 @@ if ( $bundle_a <= 0 || $bundle_b <= 0 || $bundle_c <= 0 ) {
 		'id=' . $s2_phrase_id . ' recovery=' . ( array_key_exists( 'recovery', $s2_phrase_data ) ? '1' : '0' )
 	);
 
+	// --- (allow-e1..e3) The allowlists refuse: no plan, no write ---
+	// core/html is off by default (STRUO_ALLOW_CORE_HTML is not defined in
+	// CI), so it stands in for any block outside the block allowlist.
+	struo_eval_reset_rate_limiters();
+	$allow_post = struo_eval_insert_bundle_post( $user_id, 'allow-listed', 'allow-before' );
+	$allow_off_post = struo_eval_insert_bundle_post( $user_id, 'allow-not-listed', 'allow-off-before' );
+	struo_eval_allowlist_merge( [ $allow_post ] );
+	$allow_plans_before = struo_eval_active_plan_count();
+
+	$allow_plan = struo_eval_rest(
+		'POST',
+		'/struo/v1/plan',
+		[
+			'request' => 'Insert an HTML block.',
+			'plan' => [
+				'post_id' => $allow_post,
+				'operation' => 'insert',
+				'block_name' => 'core/html',
+				'fields' => [ 'content' => '<p>allow-e1</p>' ],
+			],
+			'dry_run_preview' => true,
+		]
+	);
+	check(
+		'(allow-e1) a plan inserting a block outside the allowlist is refused with no plan and no write',
+		403 === struo_eval_rest_status( $allow_plan )
+			&& 'sae_plan_block_not_allowed' === struo_eval_rest_code( $allow_plan )
+			&& struo_eval_active_plan_count() === $allow_plans_before
+			&& false !== strpos( struo_eval_post_text( $allow_post ), 'allow-before' )
+			&& false === strpos( (string) get_post_field( 'post_content', $allow_post ), 'allow-e1' ),
+		'status=' . struo_eval_rest_status( $allow_plan ) . ' code=' . struo_eval_rest_code( $allow_plan ) . ' plans=' . $allow_plans_before . '->' . struo_eval_active_plan_count()
+	);
+
+	$allow_direct = struo_eval_rest(
+		'POST',
+		'/struo/v1/posts/' . $allow_post . '/blocks/insert',
+		[
+			'block_name' => 'core/html',
+			'fields' => [ 'content' => '<p>allow-e2</p>' ],
+			'dry_run' => true,
+		]
+	);
+	check(
+		'(allow-e2) a direct dry run inserting a block outside the allowlist is refused',
+		403 === struo_eval_rest_status( $allow_direct )
+			&& 'sae_block_not_allowed' === struo_eval_rest_code( $allow_direct )
+			&& false === strpos( (string) get_post_field( 'post_content', $allow_post ), 'allow-e2' ),
+		'status=' . struo_eval_rest_status( $allow_direct ) . ' code=' . struo_eval_rest_code( $allow_direct )
+	);
+
+	$allow_off_plan = struo_eval_rest(
+		'POST',
+		'/struo/v1/plan',
+		[
+			'request' => 'Change the paragraph to "allow-e3".',
+			'plan' => [
+				'post_id' => $allow_off_post,
+				'operation' => 'update',
+				'block_name' => 'core/paragraph',
+				'fields' => [ 'content' => 'allow-e3' ],
+			],
+			'dry_run_preview' => true,
+		]
+	);
+	check(
+		'(allow-e3) a plan on a post outside the allowlist is refused',
+		403 === struo_eval_rest_status( $allow_off_plan )
+			&& in_array( struo_eval_rest_code( $allow_off_plan ), [ 'sae_plan_post_not_allowed', 'sae_post_not_allowed' ], true )
+			&& false === strpos( (string) get_post_field( 'post_content', $allow_off_post ), 'allow-e3' ),
+		'status=' . struo_eval_rest_status( $allow_off_plan ) . ' code=' . struo_eval_rest_code( $allow_off_plan )
+	);
+
 	struo_eval_reset_rate_limiters();
 	$s3_happy = struo_eval_insert_bundle_post( $user_id, 's3-happy', 's3-happy-before' );
 	$s3_retry = struo_eval_insert_bundle_post( $user_id, 's3-retry', 's3-retry-before' );
