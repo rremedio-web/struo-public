@@ -12,6 +12,8 @@ Request → Plan (dry-run) → Durable plan row → Approve → Apply → Audit
 
 Next extractions, when they happen: REST controllers and permission policy, planning and provider coordination, privacy exporter/eraser, admin settings rendering, frontend queue / plans / API / modal modules. Do not treat the current layout as complete.
 
+A design proposal for broader, theme-aware block support (not implemented) is in [proposals/block-normalization.md](proposals/block-normalization.md).
+
 ## Layers
 
 - **Bootstrap** — `struo.php` is the WordPress entry. It registers hooks, keeps the atomic rate-limit core, and autoloads `Struo\` from `src/`.

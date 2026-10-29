@@ -1,4 +1,6 @@
-# Struo — Normalization Spec
+# Block normalization (proposal)
+
+> **Design proposal — not implemented in 0.3.x.** Struo today edits a fixed allowlist of core and ACF blocks. Nothing below is shipped behaviour.
 
 Status: draft v0
 
@@ -317,7 +319,7 @@ For each theme/block set, capture:
 - explicit-adapter block count
 - blocked block count by reason
 
-## Claude Review Contract
+## Design-review checklist (used as an AI review brief)
 
 Claude should review a concrete artifact bundle, not just a roadmap paragraph.
 

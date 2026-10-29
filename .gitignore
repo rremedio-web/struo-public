@@ -5,7 +5,8 @@ languages/*.pot
 .wp-env/
 phpcs.xml.local
 dist/
+
+# local editor/agent tooling
 .serena/
 .playwright-mcp/
-create-flow-result.md
-mission-brief-typed.png
+.cursor/

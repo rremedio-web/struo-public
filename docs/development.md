@@ -23,7 +23,13 @@ npm run lint           # ESLint + Prettier on extracted assets/src modules; synt
 npm test
 ```
 
-`bin/build-zip.sh` stages the shippable tree. It copies PHP under `src/` and built `assets/`, and drops `assets/src`. Without `.git`, set `SOURCE_DATE_EPOCH` (unix seconds) so mtimes stay deterministic.
+## Release zip
+
+`bash bin/build-zip.sh` writes `dist/struo-<version>.zip`, with the version taken from the plugin header (for example `dist/struo-0.3.1.zip`).
+
+The zip contains `struo.php`, `includes/`, the PHP classes under `src/` (not `src/work-queue` or `src/gutenberg-host`), `block-manifest.json`, `README.md`, `CHANGELOG.md`, `readme.txt`, `LICENSE`, `provider-url-guard.php`, `uninstall.php`, and the built `assets/` without `assets/src`. The file list is an explicit allowlist in the script, and the script fails if a listed file is missing.
+
+The build is deterministic: sorted entries, no extra zip fields, and mtimes fixed to the HEAD commit date. Without `.git`, set `SOURCE_DATE_EPOCH` (unix seconds). CI builds the zip, writes a `.sha256` file and scans the unpacked zip with gitleaks.
 
 ## Public clone
 

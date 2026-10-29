@@ -21,7 +21,7 @@ Approve stays REST/console. Agents still only see `plan-block-change`.
 cannot reuse that dispatcher. `dispatch_internal( 'apply-agent-plan', … )`
 returns `sae_unknown_operation`.
 
-## Frozen
+## Deliberately not provided
 
 - No `struo/approve-agent-plan` ability.
 - No MCP tool alias for apply.

@@ -1,14 +1,25 @@
 <?php
 /**
- * Runtime defense-in-depth cases for the MCP dry-run token suppression.
+ * Full WordPress runtime eval: the contract the plugin is held to.
  *
- * Run on a WP install (struo.local) as an admin so permissions and the
- * allowlist are satisfiable:
+ * Run inside a WordPress site as an administrator (CI uses wp-env):
  *
  *   wp eval-file tests/wp-eval-cases.php --user=<admin>
  *
- * Exits non-zero (via wp_die-style die()) on any failure. No secrets are
- * printed; tokens are never echoed in full.
+ * Sections, in file order:
+ * - residue sweep and transactional cleanup registry (always first)
+ * - MCP and REST origins never get a redeemable token; direct persist is refused
+ * - live REST / MCP / Abilities entry points (not callback-level)
+ * - privacy: retention, cron, excerpt redaction, export/erase, disclosure (p*)
+ * - planner routing and the daily spend cap
+ * - multi-page bundles (b*), journal and verified apply (s2, s3), Work Queue
+ *   and discovery (s4, s45), Findings (s9ro), MCP dispatch (c*), inbox (i*)
+ * - rename migrations, storage-upgrade gate, uninstall (r1-r3)
+ * - block-editor host: manual browser proofs, listed but not run (s5)
+ *
+ * Test IDs are explained in docs/TESTING.md. The file ends with exit():
+ * non-zero when any check failed. No secrets are printed; tokens are never
+ * echoed in full.
  */
 
 if ( ! defined( 'ABSPATH' ) ) {

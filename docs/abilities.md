@@ -7,7 +7,7 @@ The allowlist plus the durable plan loop (`plan_id` → `struo_approve` →
 [apply contract](security-model.md#apply-contract). Direct REST writes are
 rejected with `sae_plan_apply_required`.
 `struo/apply-agent-plan` is registered and **not** MCP-public; see
-[`docs/apply-ability-spike.md`](apply-ability-spike.md).
+[`docs/apply-ability.md`](apply-ability.md).
 
 The published action list is `Struo_Operation_Catalog` in
 `includes/class-operation-catalog.php`. Ability `mcp.public` is read from

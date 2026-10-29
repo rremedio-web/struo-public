@@ -1,0 +1,10 @@
+# Built or generated files: collapsed in GitHub diffs and left out of the
+# language stats. The release zip uses an explicit allowlist (bin/build-zip.sh),
+# so nothing here needs export-ignore.
+assets/console.js linguist-generated=true
+assets/console.css linguist-generated=true
+assets/work-queue.js linguist-generated=true
+assets/gutenberg-host.js linguist-generated=true
+assets/*.asset.php linguist-generated=true
+package-lock.json linguist-generated=true
+composer.lock linguist-generated=true

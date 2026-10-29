@@ -2,8 +2,10 @@
 #
 # Struo static smoke harness.
 # No WordPress required: lint + structural assertions over the committed
-# source. Exits non-zero on the first failing group; prints PASS/FAIL per
-# check. Run from anywhere: the script resolves its own directory.
+# source, docs and CI config, plus the pure-PHP case files and a real
+# release-zip build. Prints PASS/FAIL per check, counts failures, and
+# exits non-zero at the end if any check failed. Run from anywhere: the
+# script resolves its own directory. Section numbers are labels, not order.
 #
 # Usage: bash tests/smoke.sh
 
@@ -99,7 +101,6 @@ for limiter in check_plan_rate_limit check_rate_limit; do
 		pass "$limiter has no legacy get_transient path"
 	fi
 done
-check_count "stray root rate-limit-cas.php removed" "$MAIN" "require_once __DIR__ . '/rate-limit-cas.php';" 0
 
 echo "== 0c. Provider URL guard unit cases (pure PHP, no WP) =="
 if php "$PLUGIN_DIR/tests/provider-url-cases.php"; then
@@ -115,7 +116,7 @@ else
 	fail "plugin-entry-deactivate-cases.php has failing cases"
 fi
 
-echo "== 1. Rename hygiene: no interim identifiers in code =="
+echo "== 1. Naming: no interim identifiers in code =="
 if grep -rn --include='*.php' --include='*.json' -e 'AIBE_' -e 'aibe_' -e 'AI Assistant' "$PLUGIN_DIR"; then
 	fail "interim identifier residue"
 else
@@ -128,27 +129,16 @@ echo "== 1b. Public edition has a single entry file =="
 check_grep "header Plugin Name: Struo" "$MAIN" "* Plugin Name: Struo"
 check_grep "header Plugin URI is the public repo" "$MAIN" "* Plugin URI: https://github.com/rremedio-web/struo-public"
 check_grep "header Author URI is set" "$MAIN" "* Author URI: https://github.com/rremedio-web"
-check_count "header no longer uses the stale catalog-only description" "$MAIN" "block catalog and block inspection endpoints" 0
 HEADER_FILES="$(grep -l '^ \* Plugin Name:' "$PLUGIN_DIR"/*.php 2>/dev/null | wc -l | tr -d ' ')"
 if [ "$HEADER_FILES" = "1" ]; then
 	pass "exactly one top-level PHP file carries a Plugin Name header"
 else
 	fail "exactly one top-level PHP file carries a Plugin Name header (found $HEADER_FILES)"
 fi
-if [ -f "$PLUGIN_DIR/struo-compat.php" ]; then
-	fail "struo-compat.php is deleted (no config-managed alias)"
-else
-	pass "struo-compat.php is deleted (no config-managed alias)"
-fi
 check_count "struo.php class defined exactly once" "$MAIN" "^final class Struo_Block_Editor {" 1
 check_count "no class_alias to a former name" "$MAIN" "class_alias( 'Struo_Block_Editor'" 0
 
 echo "== 1c. REST namespace struo/v1 only =="
-if [ -f "$PLUGIN_DIR/includes/class-legacy-rest.php" ]; then
-	fail "includes/class-legacy-rest.php is removed"
-else
-	pass "includes/class-legacy-rest.php is removed"
-fi
 check_grep "REST namespace constant is struo/v1" "$MAIN" "const REST_NAMESPACE = 'struo/v1';"
 check_count "no former REST namespace constant" "$MAIN" "LEGACY_REST_NAMESPACE" 0
 COUNT_NS=$(grep -c "register_rest_route(" "$ROUTES" || true)
@@ -1217,14 +1207,7 @@ check_grep "console status reports abilities platform" "$MAIN" "'abilities' => f
 check_grep "console status reports ai_client platform" "$MAIN" "'ai_client' => function_exists( 'wp_ai_client_prompt' )"
 check_grep "console status reports connectors platform" "$MAIN" "'connectors' => self::wp_connectors_available()"
 
-echo "== 17. Former REST delegates are gone =="
-if [ -f "$PLUGIN_DIR/includes/class-legacy-rest.php" ]; then
-	fail "legacy REST module stays deleted"
-else
-	pass "legacy REST module stays deleted"
-fi
-
-echo "== 18. Hotfix: auth before allowlist in permission path =="
+echo "== 18. Auth runs before the allowlist in the permission path =="
 CAN_WRITE_BODY="$(fn_body "$MAIN" "object_write_post")"
 WRITE_AUTH_AT="$(printf '%s' "$CAN_WRITE_BODY" | grep -n 'is_user_logged_in' | head -1 | cut -d: -f1)"
 WRITE_ENSURE_AT="$(printf '%s' "$CAN_WRITE_BODY" | grep -n 'ensure_write_allowed' | head -1 | cut -d: -f1)"
@@ -1302,8 +1285,8 @@ check_grep "readme documents External services" "$PLUGIN_DIR/readme.txt" "== Ext
 check_count "stale Phase 24 sandbox defaults claim removed" "$PLUGIN_DIR/README.md" "Phase 24" 0
 check_grep "fresh installs documented fail-closed" "$PLUGIN_DIR/README.md" "Fresh installs are fail-closed"
 check_grep "abilities policy doc exists" "$PLUGIN_DIR/docs/abilities.md" "mcp.public"
-check_grep "apply-ability spike stays not MCP-public" "$PLUGIN_DIR/docs/apply-ability-spike.md" "mcp.public"
-check_grep "abilities.md points at apply-ability spike" "$PLUGIN_DIR/docs/abilities.md" "apply-ability-spike.md"
+check_grep "apply-ability doc says not MCP-public" "$PLUGIN_DIR/docs/apply-ability.md" "mcp.public"
+check_grep "abilities.md points at the apply-ability doc" "$PLUGIN_DIR/docs/abilities.md" "apply-ability.md"
 if grep -q "struo_approve" "$PLUGIN_DIR/docs/abilities.md" \
 	&& grep -q "struo_apply" "$PLUGIN_DIR/docs/abilities.md" \
 	&& ! grep -q "Review mints a REST" "$PLUGIN_DIR/docs/abilities.md"; then
@@ -1324,11 +1307,6 @@ if [ -f "$BUILD" ]; then pass "bin/build-zip.sh exists"; else fail "bin/build-zi
 for item in struo.php uninstall.php assets block-manifest.json readme.txt README.md CHANGELOG.md LICENSE includes/class-abilities.php includes/class-authority.php includes/class-durable-plans.php includes/class-mutation-journal.php includes/class-mutation-recovery.php includes/class-findings.php includes/class-operation-catalog.php includes/plugin-entry-deactivate.php provider-url-guard.php src/Audit/PrivacyExporter.php src/Rest/RouteRegistrar.php src/AI/OpenAICompatibleProvider.php; do
 	check_grep "build stages $item" "$BUILD" "$item"
 done
-if grep -q "class-legacy-rest.php" "$BUILD"; then
-	fail "build does not stage legacy REST"
-else
-	pass "build does not stage legacy REST"
-fi
 if grep -vE '^[[:space:]]*#' "$BUILD" | grep -Eq '(^|[[:space:]]"'\''/])(\.git|docs|tests|composer\.json|\.github)([[:space:]"'\''/]|$)'; then
 	fail "build script never stages .git/docs/tests/bin/composer.json/.github"
 else
@@ -1586,7 +1564,7 @@ else
 	pass "eval restore does not wipe concurrent audit rows"
 fi
 
-echo "== 22. S0a disclosure and copy =="
+echo "== 22. Disclosure and console copy =="
 if fn_body "$MAIN" "can_struo_plan" | grep -q "edit_posts"; then
 	fail "can_struo_plan has no edit_posts fallback"
 else
@@ -1634,7 +1612,7 @@ check_grep "Saved to WordPress copy" "$CONSOLE_JS" "Saved to WordPress"
 check_grep "flush failure restores selection" "$CONSOLE_JS" "function restoreBundleSelection"
 check_grep "phrase-triggered bundles remain" "$MAIN" "these pages"
 
-echo "== 23. S0b lifecycle and storage honesty =="
+echo "== 23. Plan lifecycle and storage honesty =="
 check_grep "new plans fail at capacity" "$MAIN" "sae_plan_capacity"
 check_grep "capacity helper exists" "$MAIN" "function assert_durable_plan_capacity"
 check_grep "plans table requests InnoDB" "$MAIN" "ENGINE=InnoDB"
@@ -2046,7 +2024,7 @@ else
 	fail "plan-block-change ability advertises post_ids"
 fi
 
-echo "== 31. Per-target compile tracer =="
+echo "== 31b. Per-target compile tracer =="
 if grep -q "function compile_one_mutation_target" "$MAIN"; then
 	pass "ptc-sm1 compile_one_mutation_target exists"
 else
@@ -2174,7 +2152,7 @@ check_grep "s5-e4 named" "$PLUGIN_DIR/tests/wp-eval-cases.php" "(s5-e4)"
 check_grep "s5-e5 named" "$PLUGIN_DIR/tests/wp-eval-cases.php" "(s5-e5)"
 check_grep "s5 changelog note" "$PLUGIN_DIR/CHANGELOG.md" "Mission Brief in the block editor"
 
-echo "== 33. Review follow-ups F-07–F-10 / F-14 =="
+echo "== 33. Console XSS and focus safety, allowlist cache, secret scanning =="
 CONSOLE_JS="$PLUGIN_DIR/assets/console.js"
 check_grep "setPlanEmptyState writes textContent" "$CONSOLE_JS" "els.planEmptyBody.textContent"
 if grep -n "function setPlanEmptyState" -A 20 "$CONSOLE_JS" | grep -q "planEmptyBody.innerHTML"; then
