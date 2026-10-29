@@ -1309,7 +1309,7 @@ check_grep "wp-eval live REST dispatch" "$PLUGIN_DIR/tests/wp-eval-cases.php" "r
 echo "== 15. Release zip builder =="
 BUILD="$PLUGIN_DIR/bin/build-zip.sh"
 if [ -f "$BUILD" ]; then pass "bin/build-zip.sh exists"; else fail "bin/build-zip.sh exists"; fi
-for item in struo.php uninstall.php assets block-manifest.json readme.txt README.md CHANGELOG.md LICENSE includes/class-abilities.php includes/class-authority.php includes/class-durable-plans.php includes/class-mutation-journal.php includes/class-mutation-recovery.php includes/class-findings.php includes/class-operation-catalog.php includes/plugin-entry-deactivate.php provider-url-guard.php src/Plugin.php src/Rest/RouteRegistrar.php src/AI/OpenAICompatibleProvider.php; do
+for item in struo.php uninstall.php assets block-manifest.json readme.txt README.md CHANGELOG.md LICENSE includes/class-abilities.php includes/class-authority.php includes/class-durable-plans.php includes/class-mutation-journal.php includes/class-mutation-recovery.php includes/class-findings.php includes/class-operation-catalog.php includes/plugin-entry-deactivate.php provider-url-guard.php src/Audit/PrivacyExporter.php src/Rest/RouteRegistrar.php src/AI/OpenAICompatibleProvider.php; do
 	check_grep "build stages $item" "$BUILD" "$item"
 done
 if grep -q "class-legacy-rest.php" "$BUILD"; then
@@ -1357,7 +1357,7 @@ if command -v zip >/dev/null 2>&1 && command -v unzip >/dev/null 2>&1; then
 		"struo/includes/class-operation-catalog.php" \
 		"struo/includes/plugin-entry-deactivate.php" \
 		"struo/provider-url-guard.php" \
-		"struo/src/Plugin.php" \
+		"struo/src/Audit/PrivacyExporter.php" \
 		"struo/src/Rest/RouteRegistrar.php" \
 		"struo/src/AI/OpenAICompatibleProvider.php" \
 		"struo/assets/console.js" \

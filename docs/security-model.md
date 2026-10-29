@@ -8,7 +8,7 @@ REST permission callbacks authorize through `Struo_Authority`. Anonymous callers
 
 ## Provider URL
 
-`provider-url-guard.php` (wrapped by `Struo\Security\ProviderUrlPolicy`) requires HTTPS, an allowlisted host, and a public resolution. Loopback HTTP is only for localhost when `STRUO_ALLOW_INSECURE_PROVIDER_URL` is set. Redirects are not followed (`redirection => 0`); a Location header is a new destination and is validated the same way. The bearer key is never sent across a hop.
+`provider-url-guard.php` requires HTTPS, an allowlisted host, and a public resolution. Loopback HTTP is only for localhost when `STRUO_ALLOW_INSECURE_PROVIDER_URL` is set. Redirects are not followed (`redirection => 0`); a Location header is a new destination and is validated the same way. The bearer key is never sent across a hop.
 
 ## API keys
 

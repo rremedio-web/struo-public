@@ -56,15 +56,9 @@ for item in \
 	includes/class-operation-catalog.php \
 	includes/plugin-entry-deactivate.php \
 	provider-url-guard.php \
-	src/Plugin.php \
 	src/Rest/RouteRegistrar.php \
-	src/Rest/PermissionPolicy.php \
-	src/Planning/Planner.php \
-	src/Planning/PlanRepository.php \
 	src/AI/OpenAICompatibleProvider.php \
-	src/Audit/PrivacyExporter.php \
-	src/Security/RateLimiter.php \
-	src/Security/ProviderUrlPolicy.php; do
+	src/Audit/PrivacyExporter.php; do
 	if [ ! -f "$PLUGIN_DIR/$item" ]; then
 		echo "ERROR: required file missing: $item" >&2
 		exit 1

@@ -3,7 +3,8 @@
 ## Layout
 
 - `struo.php` — WordPress entry and remaining god class (~22k lines). Extraction is incomplete.
-- `src/` — PSR-4 `Struo\` seams (REST registrar, planning facade, provider HTTP, audit, security). Several classes still delegate into `Struo_Block_Editor`.
+- `src/` — three `Struo\` classes: the REST route registrar, the OpenAI-compatible provider HTTP call, and the privacy exporter/eraser facade (see [architecture.md](architecture.md#src-classes-and-their-callers)).
+- Autoloading: at runtime `Struo\` classes load through the small `spl_autoload_register` closure near the top of `struo.php`; it maps `Struo\X\Y` to `src/X/Y.php` and silently skips missing files. The PSR-4 block in `composer.json` is for development tools only, and `vendor/` is never shipped.
 - `includes/` — durable plans, authority, abilities, findings, mutation journal
 - `assets/src/js` and `assets/src/css` — authored Mission Brief console (`app.js` is still the large remaining module)
 - `assets/console.js` / `assets/console.css` — built console (shipped)
