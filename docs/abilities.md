@@ -3,10 +3,9 @@
 Struo registers a small, allowlisted set of WordPress 6.9 abilities so MCP Adapter, AI Editor, and Kratt can discover the plugin without copying its UI.
 
 The allowlist plus the durable plan loop (`plan_id` → `struo_approve` →
-`struo_apply`) is the product. Confirmation tokens are not redeemable.
-Direct REST writes (`dry_run=false`, including a confirmation token on
-insert/update/remove/batch/`fields/update`/`pages/create`) are rejected
-with `sae_plan_apply_required`; persist is a durable-plan claim only.
+`struo_apply`) is the product; the rule is the
+[apply contract](security-model.md#apply-contract). Direct REST writes are
+rejected with `sae_plan_apply_required`.
 `struo/apply-agent-plan` is registered and **not** MCP-public; see
 [`docs/apply-ability-spike.md`](apply-ability-spike.md).
 
@@ -34,15 +33,15 @@ Abilities, and MCP call `Struo_Authority::authorize()` for the same yes/no.
 
 MCP Adapter names use hyphens (`struo-get-block-catalog`). The default MCP server lists an ability only when `meta.mcp.public` is strictly `true`.
 
-## Token contract
+## Dispatch path
 
 Read, plan, and preview execute callbacks call `Struo_Block_Editor::dispatch_internal()` with origin `mcp`. That path:
 
 1. runs `Struo_Authority::authorize()` for the operation (same caps and object rules as REST). `post_id` or `id` both resolve through `request_post_id()` (URL `id`, else body `post_id`/`id`). `dispatch_internal` also binds URL `id` so MCP body params cannot wipe the route param.
 2. forces `dry_run=true` and strips `confirmation_token`
-3. stamps `struo_origin=mcp` so minting returns `redeemable: false` — including nested `plan_block_change` → `run_plan_dry_run()` → `apply_*`
+3. stamps `struo_origin=mcp`, so every response, including nested `plan_block_change` → `run_plan_dry_run()` → `apply_*` calls, is a preview with `redeemable: false`
 
-`struo/apply-agent-plan` does **not** use `dispatch_internal`. It calls `apply_agent_plan()` with a durable `plan_id` after REST/console Approve. `issue_confirmation_token()` never stores a redeemable transient.
+`struo/apply-agent-plan` does **not** use `dispatch_internal`. It calls `apply_agent_plan()` with a durable `plan_id` after REST/console Approve (see the [apply contract](security-model.md#apply-contract)).
 
 AI Engine `struo_*` MCP tools (plus four unprefixed aliases kept for older clients: `insert-block`, `update-block`, `remove-block`, `apply-batch`) use the same dispatcher as the preview/plan abilities. The write-shaped tools only preview; their schemas do not offer `dry_run` or `confirmation_token`, and the dispatcher ignores both if a client still sends them. There is no MCP apply tool.
 

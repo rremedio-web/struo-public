@@ -31,4 +31,16 @@ Next extractions, when they happen: REST controllers and permission policy, plan
 
 ## Apply contract
 
-Agents may plan. Apply is a person at the site: console, REST with `plan_id`, or the private `struo/apply-agent-plan` ability (`mcp.public` false). Direct REST persist is `sae_plan_apply_required`.
+Agents may plan; a person applies an approved durable plan. The full rule, including what `sae_plan_apply_required` means, is in [security-model.md](security-model.md#apply-contract).
+
+## Naming
+
+`struo_` is the prefix for options, transients, hooks, capabilities and new tables (`{prefix}struo_plans`, `{prefix}struo_events`). `sae_` is the plugin's earlier prefix and is kept on purpose where renaming would break callers or stored state:
+
+- REST error codes (`sae_plan_apply_required`, `sae_post_not_allowed`, …)
+- the `{prefix}sae_audit_log` table
+- console `localStorage` keys (`sae_console_*`)
+- `sae-` CSS classes in the console
+- `SAE_*` constants, read as aliases of the `STRUO_*` ones (see [configuration.md](configuration.md))
+
+Do not rename any of these.

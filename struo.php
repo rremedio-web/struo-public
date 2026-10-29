@@ -349,6 +349,37 @@ if ( ! class_exists( 'Struo_Block_Editor' ) ):
 // Struo_Durable_Plans::ACTIVE_CAP, so the class must exist first.
 require_once __DIR__ . '/includes/class-durable-plans.php';
 
+/**
+ * The plugin's main class: hooks, settings, REST callbacks, planning,
+ * durable-plan approve/apply, block-tree editing, MCP and audit.
+ *
+ * Everything is static. The class is still large because extraction is
+ * incomplete (see docs/architecture.md). Rough map, in file order, by an
+ * anchor method you can search for:
+ *
+ * - Boot and activation ............ init(), on_activation()
+ * - Page templates and registry .... get_page_templates()
+ * - Settings and sanitizers ........ register_settings(), sanitize_options(),
+ *                                    render_settings_page()
+ * - REST routes and permissions .... register_rest_routes(), can_struo_plan()
+ * - Allowlist and block catalog .... get_allowed_post_ids(), get_block_catalog()
+ * - REST block and page handlers ... insert_block(), plan_create_page()
+ * - AI planner and provider hop .... call_openai_json_query()
+ * - Plan from request text ......... plan_block_change()
+ * - Durable plans: approve, apply .. approve_agent_plan(), apply_agent_plan()
+ * - Multi-page bundles ............. bundle_parent_record()
+ * - Agent plan inbox ............... list_agent_plan_summaries()
+ * - Request-text heuristics ........ infer_block_name_from_text()
+ * - Block-tree edits ............... apply_insert()
+ * - Tokens, hashes, rate limits .... issue_confirmation_token(), check_rate_limit()
+ * - MCP tools and dispatcher ....... register_mcp_tools(), dispatch_internal()
+ * - Storage schema and migrations .. ensure_plans_table()
+ * - Privacy export/erase ........... register_audit_data_exporter()
+ * - Audit log ...................... audit_log()
+ *
+ * Error codes, the audit table and console keys keep the earlier sae_
+ * prefix on purpose; see "Naming" in docs/architecture.md.
+ */
 final class Struo_Block_Editor {
 	const VERSION = '0.3.1';
 	const OPTION_KEY = 'struo_options';

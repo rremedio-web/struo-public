@@ -19,6 +19,10 @@ final class Struo_Operation_Catalog {
 	 * @return array<string, array<string, mixed>>
 	 */
 	public static function definitions() {
+		// Row args: route, method, ability, mcp_public, cap, object rule, apply_allowed.
+		// A '' cap means no Struo capability: the object rule alone decides.
+		// The preview-* and update-post-field rows use 'write_post' (logged
+		// in, post allowlisted, edit_post), and they only ever dry-run.
 		$rows = [
 			'get-block-catalog' => self::row( '/block-catalog', 'GET', 'struo/get-block-catalog', true, 'struo_plan', 'none', false ),
 			'get-post-blocks' => self::row( '/posts/(?P<id>\\d+)/blocks', 'GET', 'struo/get-post-blocks', true, '', 'disclose_post', false ),

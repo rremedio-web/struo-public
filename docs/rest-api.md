@@ -29,4 +29,4 @@ Create preview: `intent=create`, `payload_type=page_spec_v1`, no `serialized_con
 | GET | `/console/status` | Allowlist, queue, kill switch |
 | POST | `/console/kill-switch` | Pause writes |
 
-Block insert/update/remove and batch routes still exist for dry-run compile. They do not redeem a confirmation token.
+Block insert/update/remove and batch routes still exist for dry-run compile. They never write; see the [apply contract](security-model.md#apply-contract).

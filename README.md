@@ -2,9 +2,9 @@
 
 [![CI](https://github.com/rremedio-web/struo-public/actions/workflows/ci.yml/badge.svg)](https://github.com/rremedio-web/struo-public/actions/workflows/ci.yml)
 
-Agents may plan. Only a person applies.
+Agents may plan. Only a person applies. (MCP can never apply; see the [apply contract](docs/security-model.md#apply-contract).)
 
-Struo is a WordPress plugin for AI-assisted Gutenberg and ACF edits. Every change goes through **plan → preview → approve → apply**. Fail-closed page and block allowlists, durable plans, human approval, audit records, and provider protections. Autonomous tools cannot cash in a write token.
+Struo is a WordPress plugin for AI-assisted Gutenberg and ACF edits. Every change goes through **plan → preview → approve → apply**. Fail-closed page and block allowlists, durable plans, human approval, audit records, and provider protections. There is no write token for an agent to replay: a change is written only when a person applies an approved plan.
 
 Requires **WordPress 6.9** (Abilities API) and **PHP 8.2**. WordPress 7.0 Client / Connectors are used when present. This is a lab plugin, not a hosted product. Fresh installs are fail-closed: no pages are editable until an administrator allowlists them.
 
@@ -37,7 +37,7 @@ On WordPress 7, Auto uses the site AI Client / Connectors. The OpenAI-compatible
 
 ![Mission Brief after opening a planned change](docs/demo-plan-review.png)
 
-REST and MCP planning responses do not contain a redeemable write token. Direct persist is `sae_plan_apply_required`. Persist is durable `plan_id` → approve → apply.
+Writes follow the [apply contract](docs/security-model.md#apply-contract): durable `plan_id` → approve → apply. A direct persist returns `sae_plan_apply_required`.
 
 ## Endpoints
 
