@@ -25,6 +25,8 @@ define( 'STRUO_OPENAI_API_KEY', 'sk-...' ); // preferred
 // define( 'STRUO_ALLOW_INSECURE_PROVIDER_URL', true ); // localhost HTTP only
 ```
 
+Every constant, its legacy `SAE_*` alias, its default and related filter: [docs/configuration.md](docs/configuration.md).
+
 On WordPress 7, Auto uses the site AI Client / Connectors. The OpenAI-compatible HTTP hop is last resort. That hop uses a 45s timeout and does not follow redirects, so the bearer key is never sent to another host.
 
 ## Two-minute demo

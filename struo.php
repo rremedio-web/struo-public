@@ -8961,7 +8961,8 @@ final class Struo_Block_Editor {
 
 	private static function provider_guard_config() {
 		return [
-			'allow_insecure' => (bool) self::get_config_constant( 'STRUO_ALLOW_INSECURE_PROVIDER_URL', 'STRUO_ALLOW_INSECURE_PROVIDER_URL' ),
+			// No legacy SAE_ alias exists for the insecure-URL override.
+			'allow_insecure' => defined( 'STRUO_ALLOW_INSECURE_PROVIDER_URL' ) && STRUO_ALLOW_INSECURE_PROVIDER_URL,
 			'allow_private'  => (bool) self::get_config_constant( 'SAE_ALLOW_PRIVATE_PROVIDER_URL', 'STRUO_ALLOW_PRIVATE_PROVIDER_URL' ),
 			'allowed_hosts'  => self::get_allowed_provider_hosts(),
 		];
